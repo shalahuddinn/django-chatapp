@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from chat.models import Conversation, Message, UserConversation
+from chat.models import Conversation, Message
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,3 +14,25 @@ class UserSerializer(serializers.ModelSerializer):
                                         validated_data['email'], validated_data['password']
                                         )
         return user
+
+
+class ConversationUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    participants = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
+                                                      many=True)
+
+    class Meta:
+        model = Conversation
+        fields = ['id', 'participants']
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'conversation_id', 'sender',
+                  'message', 'timestamp', 'is_read']

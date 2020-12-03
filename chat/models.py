@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Conversation(models.Model):
-    pass
+    participants = models.ManyToManyField(User)
 
 
 class Message(models.Model):
@@ -24,8 +24,8 @@ class Message(models.Model):
         ordering = ('timestamp',)
 
 
-class UserConversation(models.Model):
-    user_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='user')
-    conversation_id = models.ForeignKey(
-        Conversation, on_delete=models.CASCADE, related_name='conversation')
+# class UserConversation(models.Model):
+#     user_id = models.ForeignKey(
+#         User, on_delete=models.CASCADE, related_name='user')
+#     conversation_id = models.ForeignKey(
+#         Conversation, on_delete=models.CASCADE, related_name='conversation')
