@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth.models import User
 from chat.models import Conversation, Message
-from chat.serializers import UserSerializer, ConversationSerializer, MessageSerializer
+from chat.serializers import UserSerializer, ConversationSerializer, MessageSerializer, ConversationSpecificUserSerializer
 
 # Create your views here.
 
@@ -36,6 +36,25 @@ class MessageListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ConversationListSpecificUserView(APIView):
+    """
+    List all conversations for a specific user
+    """
+
+    def get_user_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        user = self.get_user_object(pk)
+        conversations = Conversation.objects.filter(participants=user)
+        serializer = ConversationSpecificUserSerializer(
+            conversations, many=True)
+        return Response(serializer.data)
+
+
 class ConversationListView(APIView):
     """
     List all conversations, or create a new conversation.
@@ -48,6 +67,7 @@ class ConversationListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        # print(request.data)
         serializer = ConversationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

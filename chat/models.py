@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Conversation(models.Model):
-    participants = models.ManyToManyField(User)
+    participants = models.ManyToManyField(User, related_name="conversation")
 
 
 class Message(models.Model):
