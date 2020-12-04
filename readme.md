@@ -36,7 +36,7 @@ This endpoint is opened in public.
 ```json
 {
   "username": "bangjago",
-  "email": bangjago@bangjago.com,
+  "email": "bangjago@bangjago.com",
   "password": "bangjago"
 }
 ```
@@ -149,8 +149,8 @@ Body
 
 ```json
 {
-  /* Format: [<username1>, <username2>] 
-  User who made the request should be in the participants list */
+  //   Format: [<username1>, <username2>]
+  //   User who made the request should be in the participants list
   "participants": ["bangjago", "bangjago2"]
 }
 ```

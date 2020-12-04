@@ -8,9 +8,9 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 # from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
+from django.db.models import Q
 from chat.models import Conversation, Message
 from chat.serializers import UserSerializer, ConversationSerializer, MessageSerializer, ConversationSpecificUserSerializer
-
 # Create your views here.
 
 
@@ -19,20 +19,34 @@ class MessageListView(APIView):
     List all messages in a conversation, or create a new message in a conversation.
     """
 
-    def get_object(self, pk):
-        try:
-            return Message.objects.filter(conversation_id=pk)
-        except Message.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
-        messages = self.get_object(pk)
+        user = self.request.user
+        try:
+            conversation = Conversation.objects.get(id=pk)
+        except Conversation.DoesNotExist:
+            return Response({"error": "Conversation with that id doesn't exist"})
+        participants = conversation.participants.all()
+        if user not in participants:
+            return Response({"error": "User is not a participant in this conversation"})
+
+        # Make unread_message is_read as True
+        unread_message = Message.objects.filter(
+            ~Q(sender=user), conversation_id=pk)
+        print(f'unread_message: {unread_message}')
+        for message in unread_message:
+            message.is_read = True
+            message.save()
+        messages = Message.objects.filter(conversation_id=pk)
         serializer = MessageSerializer(messages, many=True)
-        print(f'user: {request.user}')
         return Response(serializer.data)
 
     def post(self, request, pk, format=None):
-        serializer = MessageSerializer(data=request.data)
+        data = {
+            "conversation_id": pk,
+            "sender": self.request.user.pk,
+            "message": request.data["message"]
+        }
+        serializer = MessageSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -52,7 +66,7 @@ class ConversationListSpecificUserView(APIView):
         return Response(serializer.data)
 
 
-class ConversationListView(APIView):
+class ConversationView(APIView):
     """
     List all conversations, or create a new conversation.
     """
@@ -99,7 +113,6 @@ class UserListView(APIView):
         users = User.objects.all()
         serializer = UserSerializer(
             users, many=True)
-
         return Response(serializer.data)
 
     def post(self, request, format=None):
