@@ -16,7 +16,7 @@ ChatApp is a REST API build by using the Django Rest Framework. My environment:
 python manage.py runserver
 ```
 
-4. For add or remove data into database, better to use django admin page.
+4. For add or remove data into database, better to use django admin page. `/admin/`
 
 ```
 username=admin
@@ -149,8 +149,8 @@ Body
 
 ```json
 {
-  /* Format: [<username1>, <username2>] */
-  /* User who made the request should be in the participants list */
+  /* Format: [<username1>, <username2>] 
+  User who made the request should be in the participants list */
   "participants": ["bangjago", "bangjago2"]
 }
 ```
