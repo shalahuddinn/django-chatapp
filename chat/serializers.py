@@ -142,6 +142,11 @@ class ModelUserSerializer(serializers.ModelSerializer):
 
 
 class ModelMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
+
     class Meta:
         model = Message
         fields = '__all__'
