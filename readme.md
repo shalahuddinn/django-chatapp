@@ -156,7 +156,7 @@ Format: [<username1>, <username2>]
 
 ## 5. Get all messages in a conversation
 
-#### `GET api/conversation/<int:pk>/message/` (pk is the conversation id)
+#### `GET /api/conversation/<int:pk>/message/` (pk is the conversation id)
 
 ##### Request
 
@@ -184,7 +184,7 @@ Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 
 ## 6. Send a message in a conversation
 
-#### `POST api/conversation/<int:pk>/message/` (pk is the conversation id)
+#### `POST /api/conversation/<int:pk>/message/` (pk is the conversation id)
 
 ##### Request
 
