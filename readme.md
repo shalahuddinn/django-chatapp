@@ -123,7 +123,7 @@ Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 
 ## 4. Create a conversation
 
-#### `POST /api/conversations/create/`
+#### `POST /api/conversation/create/`
 
 ##### Request
 
