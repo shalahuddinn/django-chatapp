@@ -4,6 +4,7 @@ from rest_framework import serializers
 from chat.models import Conversation, Message
 
 
+#  Use Case Scenario
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -17,12 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class ConversationUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username']
-
-
 class LastMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -30,7 +25,10 @@ class LastMessageSerializer(serializers.ModelSerializer):
 
 
 class ConversationSpecificUserSerializer(serializers.ModelSerializer):
-    participants = ConversationUserSerializer(many=True)
+    participants = serializers.SlugRelatedField(
+        queryset=User.objects.all(), many=True,
+        slug_field='username'
+    )
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
 
@@ -40,7 +38,6 @@ class ConversationSpecificUserSerializer(serializers.ModelSerializer):
 
     def get_user_from_request(self):
         request = self.context.get('request')
-        # print(f'request: {request}')
         if not request:
             return None
         if not hasattr(request, 'user'):
@@ -70,8 +67,6 @@ class ConversationSpecificUserSerializer(serializers.ModelSerializer):
 
 
 class ConversationSerializer(serializers.ModelSerializer):
-    # participants = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
-    #                                                   many=True)
     participants = serializers.SlugRelatedField(
         queryset=User.objects.all(), many=True,
         slug_field='username'
@@ -135,3 +130,31 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'conversation_id', 'sender',
                   'message', 'timestamp', 'is_read']
+
+
+# Model/data manipulation
+class ModelUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        # fields = '__all__'
+        fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+class ModelMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = '__all__'
+
+
+class ModelConversationSerializer(serializers.ModelSerializer):
+    participants = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',
+        many=True
+    )
+
+    class Meta:
+        model = Conversation
+        fields = ['id', 'participants']
+        depth = 1

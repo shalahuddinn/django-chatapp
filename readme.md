@@ -9,27 +9,40 @@ ChatApp is a REST API build by using the Django Rest Framework. My environment:
 ## Usage
 
 1. Install all the packages above in a virtual environment or global environment. In case of using virtual environment, do not forget to activate it first.
-2. change directory to this root project. (cd command).
+2. change directory to this root project (cd command).
 3. run the django server
 
 ```bash
 python manage.py runserver
 ```
 
-4. For add or remove data into database, better to use django admin page. `/admin/`
+4. For add or remove data into database/model, you can use django admin page or access the Model/Data Manipulation page
+
+#### django admin page superuser information
 
 ```
 username=admin
 password=admin
 ```
 
-# 1. Use case scenario
+#### Model/Data manipulation page URL. CRUD operation can be done on the page.
 
-## Create user first.
+```
+# Retrieve, create, update or delete a User model.
+/data/user/
 
-#### `POST /api/users/register/`
+# Retrieve, create, update or delete a Message model.
+/data/message/
 
-This endpoint is opened in public.
+# Retrieve, create, update or delete a Conversation model.
+/data/conversation/
+```
+
+# Use case scenario
+
+## 1. Create user first.
+
+#### `POST /api/user/register/`
 
 ##### Request
 
@@ -45,18 +58,16 @@ This endpoint is opened in public.
 
 ```json
 {
-  "id": 10,
+  "id": 2,
   "username": "bangjago",
   "email": "bangjago@bangjago.com",
-  "token": "37baa65bdf296445b76c39dd101550adf4fe03fd"
+  "token": "6a77d071c456898b679b1d504e14c9edc9fff0dc"
 }
 ```
 
 ## 2. If you forget the token, you can get the token by login. (1 User = 1 Token)
 
-#### `POST /api/users/login/`
-
-This endpoint is opened in public.
+#### `POST /api/user/login/`
 
 ##### Request
 
@@ -71,21 +82,21 @@ This endpoint is opened in public.
 
 ```json
 {
-  "token": "37baa65bdf296445b76c39dd101550adf4fe03fd"
+  "token": "6a77d071c456898b679b1d504e14c9edc9fff0dc"
 }
 ```
 
-## 3. Get list all of the conversations that a user has
+## 3. Get a list of all of the conversations that a user participate
 
-#### `GET /api/conversations/users/`
+#### `GET /api/conversation/user/`
 
 ##### Request
 
 Header
 
-```json
-/* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word */
-Authorization: Token 37baa65bdf296445b76c39dd101550adf4fe03fd
+```
+# DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word.
+Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 ```
 
 Body
@@ -100,41 +111,25 @@ Body
 [
   {
     "id": 1,
-    "participants": [
-      {
-        "id": 6,
-        "username": "bangjago2"
-      },
-      {
-        "id": 10,
-        "username": "bangjago"
-      }
-    ],
+    "participants": ["bangjago", "bangjago2"],
     "last_message": {
-      "message": "punten",
-      "timestamp": "2020-12-03T10:22:22.454937Z"
-    }
+      "message": "halo bangjago2",
+      "timestamp": "2020-12-05T08:12:00.248979Z"
+    },
+    "unread_count": 0
   },
   {
     "id": 2,
-    "participants": [
-      {
-        "id": 8,
-        "username": "bangjago3"
-      },
-      {
-        "id": 10,
-        "username": "bangjago"
-      }
-    ],
-    "last_message": null
+    "participants": ["bangjago", "bangjago3"],
+    "last_message": null,
+    "unread_count": 0
   }
 ]
 ```
 
 ## 4. Create a conversation
 
-#### `POST /api/conversations/`
+#### `POST /api/conversations/create/`
 
 ##### Request
 
@@ -142,15 +137,16 @@ Header
 
 ```json
 /* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word */
-Authorization: Token 37baa65bdf296445b76c39dd101550adf4fe03fd
+Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 ```
 
 Body
 
+User who made the request should be in the participants list.
+Format: [<username1>, <username2>]
+
 ```json
 {
-  //   Format: [<username1>, <username2>]
-  //   User who made the request should be in the participants list
   "participants": ["bangjago", "bangjago2"]
 }
 ```
@@ -159,14 +155,14 @@ Body
 
 ```json
 {
-  "id": 12,
-  "participants": ["bangjago2", "bangjago"]
+  "id": 1,
+  "participants": ["bangjago", "bangjago2"]
 }
 ```
 
-## 5. Get messages in a conversations
+## 5. Get all messages in a conversation
 
-#### `GET api/conversations/<int:pk>/messages/` (pk is the conversation id)
+#### `GET api/conversation/<int:pk>/message/` (pk is the conversation id)
 
 ##### Request
 
@@ -174,7 +170,7 @@ Header
 
 ```json
 /* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word */
-Authorization: Token 37baa65bdf296445b76c39dd101550adf4fe03fd
+Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 ```
 
 Body
@@ -186,5 +182,48 @@ Body
 ##### Response
 
 ```json
-{}
+[
+  {
+    "id": 1,
+    "conversation_id": 1,
+    "sender": "bangjago",
+    "message": "halo bangjago2",
+    "timestamp": "2020-12-05T08:12:00.248979Z",
+    "is_read": false
+  }
+]
+```
+
+## 6. Send a message in a conversation
+
+#### `POST api/conversation/<int:pk>/message/` (pk is the conversation id)
+
+##### Request
+
+Header
+
+```json
+/* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word */
+Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
+```
+
+Body
+
+```json
+{
+  "message": "halo bangjago2"
+}
+```
+
+##### Response
+
+```json
+{
+  "id": 1,
+  "conversation_id": 1,
+  "sender": "bangjago",
+  "message": "halo bangjago2",
+  "timestamp": "2020-12-05T08:12:00.248979Z",
+  "is_read": false
+}
 ```
