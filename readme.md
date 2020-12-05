@@ -99,6 +99,8 @@ Header
 Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
 ```
 
+![Screenshot](request-header-screenshot.png)
+
 ##### Response
 
 ```json
