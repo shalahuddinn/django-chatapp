@@ -18,7 +18,7 @@ class UserRegisterView(APIView):
     """
     Create a new user.
     """
-    # Disable authentication, open to public
+    # Disable permission
     permission_classes = []
 
     def post(self, request, format=None):
@@ -38,7 +38,7 @@ class UserRegisterView(APIView):
 
 class ConversationListSpecificUserView(APIView):
     """
-    List all conversations for a specific user
+    List of all of the conversations that a user participate
     """
 
     def get(self, request, format=None):
@@ -78,7 +78,7 @@ class MessageListCreateView(APIView):
         if user not in participants:
             return Response({"error": "User is not a participant in this conversation"})
 
-        # Update all unread messages is_read field as True
+        # Update all unread messages is_read field as True if the user who made the get request are not the sender
         unread_messages = Message.objects.filter(
             ~Q(sender=user), conversation_id=pk, is_read=False)
         print(f'unread_message: {unread_messages}')
@@ -101,60 +101,6 @@ class MessageListCreateView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# Model/data Manipulation
-class ConversationDetailView(APIView):
-    """
-    Retrieve, update or delete a conversation instance.
-    """
-
-    def get_object(self, pk):
-        try:
-            return Conversation.objects.get(pk=pk)
-        except Conversation.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        conversation = self.get_object(pk)
-        serializer = ConversationSerializer(conversation)
-        return Response(serializer.data)
-
-
-class UserListView(APIView):
-    """
-    List all users, or create a new user.
-    """
-
-    def get(self, request, format=None):
-        users = User.objects.all()
-        serializer = UserSerializer(
-            users, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserDetailView(APIView):
-    """
-    Retrieve, update or delete a user instance.
-    """
-
-    def get_object(self, pk):
-        try:
-            return User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
 
 
 # Model Data Manipulation

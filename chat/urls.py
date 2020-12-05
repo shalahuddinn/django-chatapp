@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 
-# Model/data Manipulation
+# Model/data Manipulation URL
 router = DefaultRouter()
 router.register(r'data/user', views.ModelUserViewset)
 router.register(r'data/message', views.ModelMessageViewset)

@@ -95,14 +95,8 @@ password=admin
 Header
 
 ```
-# DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word.
+/* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word. */
 Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
-```
-
-Body
-
-```json
-{}
 ```
 
 ##### Response
@@ -171,12 +165,6 @@ Header
 ```json
 /* DO NOT FORGET TO PUT A SPACE CHARACTER AFTER 'Token' word */
 Authorization: Token 6a77d071c456898b679b1d504e14c9edc9fff0dc
-```
-
-Body
-
-```json
-{}
 ```
 
 ##### Response

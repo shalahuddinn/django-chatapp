@@ -1,7 +1,5 @@
 from django.db import models
-# Importing User Model
 from django.contrib.auth.models import User
-
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -29,13 +27,12 @@ class Message(models.Model):
         ordering = ('timestamp',)
 
 
+# Auto generate Token for a new created user
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
-# class UserConversation(models.Model):
-#     user_id = models.ForeignKey(
-#         User, on_delete=models.CASCADE, related_name='user')
-#     conversation_id = models.ForeignKey(
-#         Conversation, on_delete=models.CASCADE, related_name='conversation')
+
+# Make the email field as required field in the user model
+User._meta.get_field('email').blank = False
