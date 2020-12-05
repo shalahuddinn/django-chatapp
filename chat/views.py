@@ -69,12 +69,15 @@ class MessageListCreateView(APIView):
     """
 
     def get(self, request, pk, format=None):
-        user = self.request.user
+        # Check if the conversation with pk as the id exist
         try:
             conversation = Conversation.objects.get(id=pk)
         except Conversation.DoesNotExist:
             return Response({"error": "Conversation with that id doesn't exist"})
+
+        # Check if the user is a participant in the conversation
         participants = conversation.participants.all()
+        user = self.request.user
         if user not in participants:
             return Response({"error": "User is not a participant in this conversation"})
 
@@ -91,11 +94,30 @@ class MessageListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request, pk, format=None):
-        data = {
-            "conversation_id": pk,
-            "sender": self.request.user.username,
-            "message": request.data["message"]
-        }
+        # Check if the conversation with pk as the id exist
+        try:
+            conversation = Conversation.objects.get(id=pk)
+        except Conversation.DoesNotExist:
+            return Response({"error": "Conversation with that id doesn't exist"})
+
+        # Check if the user is a participant in the conversation
+        participants = conversation.participants.all()
+        user = self.request.user
+        if user not in participants:
+            return Response({"error": "Can't send a message. User is not a participant in this conversation"})
+
+        # Check if the request.data has message field
+        try:
+            data = {
+                "conversation_id": pk,
+                "sender": self.request.user.username,
+                "message": request.data["message"]
+            }
+        except:
+            return Response({"message": [
+                "This field is required."
+            ]})
+
         serializer = MessageSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
