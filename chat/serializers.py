@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from rest_framework import serializers
 from chat.models import Conversation, Message
 
@@ -31,10 +32,20 @@ class LastMessageSerializer(serializers.ModelSerializer):
 class ConversationSpecificUserSerializer(serializers.ModelSerializer):
     participants = ConversationUserSerializer(many=True)
     last_message = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'participants', 'last_message']
+        fields = ['id', 'participants', 'last_message', 'unread_count']
+
+    def get_user_from_request(self):
+        request = self.context.get('request')
+        # print(f'request: {request}')
+        if not request:
+            return None
+        if not hasattr(request, 'user'):
+            return None
+        return request.user
 
     def get_last_message(self, obj):
         try:
@@ -45,6 +56,17 @@ class ConversationSpecificUserSerializer(serializers.ModelSerializer):
         except:
             last_message = None
             return last_message
+
+    def get_unread_count(self, obj):
+        user = self.get_user_from_request()
+        try:
+            unread_message_count = Message.objects.filter(
+                ~Q(sender=user), conversation_id=obj.id, is_read=False).count()
+            print(f'unread_count:{unread_message_count}')
+            return unread_message_count
+        except Message.DoesNotExist:
+            unread_message_count = 0
+            return unread_message_count
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -82,7 +104,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
         if value[0] == value[1]:
             raise serializers.ValidationError(
-                "Participant 1 and Participant 2 can't be from the user")
+                "Participant 1 and Participant 2 can't be from the same user")
 
         user = self.get_user_from_request()
         # print(f'user: {user}')
@@ -104,6 +126,11 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
+
     class Meta:
         model = Message
         fields = ['id', 'conversation_id', 'sender',

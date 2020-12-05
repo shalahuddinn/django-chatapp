@@ -30,10 +30,10 @@ class MessageListView(APIView):
             return Response({"error": "User is not a participant in this conversation"})
 
         # Make unread_message is_read as True
-        unread_message = Message.objects.filter(
-            ~Q(sender=user), conversation_id=pk)
-        print(f'unread_message: {unread_message}')
-        for message in unread_message:
+        unread_messages = Message.objects.filter(
+            ~Q(sender=user), conversation_id=pk, is_read=False)
+        print(f'unread_message: {unread_messages}')
+        for message in unread_messages:
             message.is_read = True
             message.save()
         messages = Message.objects.filter(conversation_id=pk)
@@ -43,7 +43,7 @@ class MessageListView(APIView):
     def post(self, request, pk, format=None):
         data = {
             "conversation_id": pk,
-            "sender": self.request.user.pk,
+            "sender": self.request.user.username,
             "message": request.data["message"]
         }
         serializer = MessageSerializer(data=data)
@@ -62,7 +62,7 @@ class ConversationListSpecificUserView(APIView):
         user = self.request.user
         conversations = Conversation.objects.filter(participants=user)
         serializer = ConversationSpecificUserSerializer(
-            conversations, many=True)
+            conversations, context={'request': request}, many=True)
         return Response(serializer.data)
 
 
